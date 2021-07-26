@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<init>
+		<log text="AntilatencyAltTracking init"/>
+		<setBoolFromProperty result="bGradle" ini="Engine" section="/Script/AndroidRuntimeSettings.AndroidRuntimeSettings" property="bEnableGradle" default="false"/>
+        <if condition="bGradle">
+            <true>
+                <log text="Processing Antilatency Alt Tracking using gradle"/>
+            </true>
+            <false>
+                <log text="Processing Antilatency Alt Tracking using ant"/>
+            </false>
+        </if>
+	</init>
+	
+	<proguardAdditions>
+		<insert>
+			-keep class com.antilatency.** {
+            *;
+            }
+		</insert>
+	</proguardAdditions>
+
+	<baseBuildGradleAdditions>
+		<if condition="bGradle">
+			<true>
+				<setStringReplace result="PluginPathSlash" source="$S(PluginDir)" find="\" with="/"/>
+				<insert>
+					allprojects {
+					repositories {
+					repositories {
+					flatDir {
+				</insert>
+				<insertValue value="dirs '$S(PluginPathSlash)/../../ThirdParty/Antilatency/Bin/Android'"/>
+				<insertNewline/>
+				<insert>
+					}
+					}
+					}
+					}
+				</insert>
+			</true>
+		</if>
+	</baseBuildGradleAdditions>
+	
+	<buildGradleAdditions>
+		<if condition="bGradle">
+			<true>
+				<insert>
+					dependencies {
+						compile(name: 'AntilatencyAltTracking', ext: 'aar')
+					}
+				</insert>
+			</true>>
+		</if>
+	</buildGradleAdditions>
+
+	<AARImports>
+		<insertValue value="repository $S(PluginDir)/../../ThirdParty/Antilatency/Bin/Android/"/>
+		<insertNewline/>
+		<insertValue value="AntilatencyAltTracking"/>
+		<insertNewline/>
+	</AARImports>
+ 
+    <!-- optional files or directories to copy to Intermediate/Android/APK -->
+	<resourceCopies>
+		<if condition="bGradle">
+            <false>
+				<setBoolIsEqual result="isArmeabi-v7a" arg1="$S(Architecture)" arg2="armeabi-v7a" />
+				<if condition="isArmeabi-v7a">
+					<true>
+						<copyFile src="$S(PluginDir)/JavaLibs/AntilatencyAltTracking/jni/armeabi-v7a/libAntilatencyAltTracking.so"
+							dst="$S(BuildDir)/libs/armeabi-v7a/libAntilatencyAltTracking.so" />
+						<log text="Copying libAntilatencyAltTracking.so"/>
+					</true>
+				</if>
+				
+				<setBoolIsEqual result="isArm64-v8a" arg1="$S(Architecture)" arg2="arm64-v8a" />
+				<if condition="isArm64-v8a">
+					<true>
+						<copyFile src="$S(PluginDir)/JavaLibs/AntilatencyAltTracking/jni/arm64-v8a/libAntilatencyAltTracking.so"
+							dst="$S(BuildDir)/libs/isArm64-v8a/libAntilatencyAltTracking.so" />
+						<log text="Copying libAntilatencyAltTracking.so"/>
+					</true>
+				</if>
+			</false>
+        </if>
+	</resourceCopies>
+	
+	<!-- optional libraries to load in GameActivity.java before libUE4.so-->
+	<soLoadLibrary>
+        <log text="Loading AntilatencyAltTracking.so"/>
+		<loadLibrary name="AntilatencyAltTracking" failmsg="AltTracking library not loaded and required!" />
+		<log text="Loading AntilatencyAltTracking.so complete"/>
+	</soLoadLibrary> 
+ </root>
+ 
