@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<init>
+		<log text="AntilatencyBracer init"/>
+        <setBoolFromProperty result="bGradle" ini="Engine" section="/Script/AndroidRuntimeSettings.AndroidRuntimeSettings" property="bEnableGradle" default="false"/>
+        <if condition="bGradle">
+            <true>
+                <log text="Processing Antilatency Bracer using gradle"/>
+            </true>
+            <false>
+                <log text="Processing Antilatency Bracer using ant"/>
+            </false>
+        </if>
+	</init>
+
+    <proguardAdditions>
+        <insert>
+            -keep class com.antilatency.** {
+            *;
+            }
+        </insert>
+	</proguardAdditions>
+
+    <baseBuildGradleAdditions>
+        <if condition="bGradle">
+            <true>
+                <setStringReplace result="PluginPathSlash" source="$S(PluginDir)" find="\" with="/"/>
+                <insert>
+                    allprojects {
+                    repositories {
+                    repositories {
+                    flatDir {
+                </insert>
+                <insertValue value="dirs '$S(PluginPathSlash)/../../ThirdParty/Antilatency/Bin/Android'"/>
+                <insertNewline/>
+                <insert>
+                    }
+                    }
+                    }
+                    }
+                </insert>
+            </true>
+        </if>
+    </baseBuildGradleAdditions>
+
+	<buildGradleAdditions>
+        <if condition="bGradle">
+            <true>        
+                <insert>
+                    dependencies {
+                        compile(name: 'AntilatencyBracer', ext: 'aar')
+                    }
+                </insert>
+            </true>
+        </if>
+	</buildGradleAdditions>
+
+    <AARImports>
+        <insertValue value="repository $S(PluginDir)/../../ThirdParty/Antilatency/Bin/Android/"/>
+        <insertNewline/>
+        <insertValue value="AntilatencyBracer"/>
+        <insertNewline/>
+    </AARImports>
+
+    <resourceCopies>
+        <if condition="bGradle">
+            <false>
+                <setBoolIsEqual result="isArmeabi-v7a" arg1="$S(Architecture)" arg2="armeabi-v7a" />
+                <if condition="isArmeabi-v7a">
+                    <true>
+                        <copyFile src="$S(BuildDir)/JavaLibs/AntilatencyBracer/jni/armeabi-v7a/libAntilatencyBracer.so"
+                        dst="$S(BuildDir)/libs/armeabi-v7a/libAntilatencyBracer.so" />
+                        <log text="Copying libAntilatencyBracer.so"/>
+                    </true>
+                </if>
+				
+				<setBoolIsEqual result="isArm64-v8a" arg1="$S(Architecture)" arg2="arm64-v8a" />
+                <if condition="isArm64-v8a">
+                    <true>
+                        <copyFile src="$S(BuildDir)/JavaLibs/AntilatencyBracer/jni/arm64-v8a/libAntilatencyBracer.so"
+                        dst="$S(BuildDir)/libs/arm64-v8a/libAntilatencyBracer.so" />
+                        <log text="Copying libAntilatencyBracer.so"/>
+                    </true>
+                </if>
+            </false>
+        </if>
+    </resourceCopies>
+    
+	<soLoadLibrary>
+		<log text="Loading AntilatencyBracer.so"/>
+		<loadLibrary name="AntilatencyBracer" failmsg="AntilatencyBracer library not loaded and required!" />
+		<log text="Loading AntilatencyBracer.so complete"/>
+	</soLoadLibrary>
+ </root>
+ 
